@@ -1,1 +1,1 @@
-# messaging-app
+This is the initial commit for message app using golang
