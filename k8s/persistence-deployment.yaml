@@ -1,0 +1,52 @@
+# k8s/persistence-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persistence-service
+  namespace: messaging-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: persistence-service
+  template:
+    metadata:
+      labels:
+        app: persistence-service
+    spec:
+      containers:
+      - name: persistence-service
+        image: your-dockerhub-username/persistence-service:latest  # Replace with your image
+        ports:
+        - containerPort: 8082
+        env:
+        - name: PORT
+          value: "8082"
+        - name: KAFKA_BROKER
+          value: "kafka:9092"
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: DB_NAME
+          value: "messaging"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: persistence-service
+  namespace: messaging-app
+spec:
+  selector:
+    app: persistence-service
+  ports:
+  - port: 8082
+    targetPort: 8082
+  type: ClusterIP
